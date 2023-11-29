@@ -1,13 +1,27 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, render_template, redirect, url_for
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 import requests
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from io import BytesIO
+import base64
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
+@app.route('/', methods = ['GET', 'POST'])
+def form():
+
+    if request.method == 'POST':
+        # Get the URL from the form
+        url = request.form.get('url')
+        # Redirect to the /plot route with the URL as a parameter
+        return redirect(url_for('plot', url=url))
+    return render_template('form.html')
+
+@app.route('/plot')
+def plot():
+    
     # Get the 'url' parameter from the URL
     playlist_url = request.args.get('url', default = "", type = str)
 
@@ -163,7 +177,15 @@ def home():
     # Add tick marks by increments of one
     plt.xticks(range(0, df['Count'].max() + 1, 1))
 
-    plt.show()
+    canvas = FigureCanvas(fig)
+    png_output = BytesIO()
+    canvas.print_png(png_output)
+
+    # Encode the BytesIO object as a base64 string
+    img_data = base64.b64encode(png_output.getvalue()).decode('utf8')
+
+    # Render the HTML template and pass the base64 string to it
+    return render_template('index.html', img_data=img_data)
 
 
 
