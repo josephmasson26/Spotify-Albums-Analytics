@@ -22,7 +22,15 @@ def form():
 @app.route('/plot', methods = ['GET', 'POST'])
 def plot():
     
-    playlist_id = request.args.get('url', default = "", type = str).split('/')[-1].split('?')[0]
+    playlist_id = request.args.get('url', default = "", type = str)
+    
+    # Split the URL by the '/' character and get the part after 'playlist/'
+    playlist_part = playlist_id.split('/')[-1]
+
+    # Split this part by the '?' character to get the playlist ID
+    playlist_id = playlist_part.split('?')[0]
+
+    print(playlist_id)
 
     # Define the URL, headers, and data for the token request
     token_url = "https://accounts.spotify.com/api/token"
