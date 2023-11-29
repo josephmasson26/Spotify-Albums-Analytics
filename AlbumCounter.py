@@ -9,7 +9,7 @@ import base64
 
 app = Flask(__name__)
 
-@app.route('/home', methods = ['GET', 'POST'])
+@app.route('/', methods = ['GET', 'POST'])
 def form():
 
     if request.method == 'POST':
@@ -93,13 +93,13 @@ def plot():
         album_id = track['track']['album']['id']
 
         # Make a GET request to the Spotify API to get the album details
-        album_response = requests.get(f"https://api.spotify.com/v1/albums/{album_id}", headers=headers)
+        album_response = requests.get(f"https://api.spotify.com/v1/albums/{album_id}", headers=playlist_headers)
 
         # Extract the album title
         album_title = album_response.json()['name']
 
         # Make a GET request to the Spotify API to get the album's tracks
-        album_tracks_response = requests.get(f"https://api.spotify.com/v1/albums/{album_id}/tracks", headers=headers)
+        album_tracks_response = requests.get(f"https://api.spotify.com/v1/albums/{album_id}/tracks", headers=playlist_headers)
 
         # If the album does not have more than 2 songs, remove the track from tracks
         if album_tracks_response.json()['total'] <= 2:
@@ -148,7 +148,7 @@ def plot():
 
     # Add tick marks by increments of one
     plt.xticks(range(0, df['Count'].max() + 1, 1))
-
+    fig = plt.gcf()
     canvas = FigureCanvas(fig)
     png_output = BytesIO()
     canvas.print_png(png_output)
