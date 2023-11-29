@@ -9,7 +9,7 @@ import base64
 
 app = Flask(__name__)
 
-@app.route('/', methods = ['GET', 'POST'])
+@app.route('/home', methods = ['GET', 'POST'])
 def form():
 
     if request.method == 'POST':
@@ -19,65 +19,38 @@ def form():
         return redirect(url_for('plot', url=url))
     return render_template('form.html')
 
-@app.route('/plot')
+@app.route('/plot', methods = ['GET', 'POST'])
 def plot():
     
-    # Get the 'url' parameter from the URL
-    playlist_url = request.args.get('url', default = "", type = str)
+    playlist_id = request.args.get('url', default = "", type = str).split('/')[-1].split('?')[0]
 
-    # Split the URL by the '/' character and get the part after 'playlist/'
-    playlist_part = playlist_url.split('/')[-1]
-
-    # Split this part by the '?' character to get the playlist ID
-    playlist_id = playlist_part.split('?')[0]
-
-    # This section makes the API call to Spotify to get the playlist data, and prints out the status of the call.
-    # A 200 means the call was successful!
-
-
-    # Define the URL
-    url = "https://accounts.spotify.com/api/token"
-
-    # Define the headers
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-    }
-
-    # Define the data
-    data = {
+    # Define the URL, headers, and data for the token request
+    token_url = "https://accounts.spotify.com/api/token"
+    token_headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    token_data = {
         "grant_type": "client_credentials",
         "client_id": "66199634274347538430009f1d54f87e",
         "client_secret": "84c6c86940154d0e84e05ed1ae75d9ae",
     }
 
-    # Make the POST request
-    response = requests.post(url, headers=headers, data=data)
-
-    # Print the status code
-    status_code = response.status_code
-
-    # # Print the response text
-    # api_response = response.text
-
-    # Convert the response text to a dictionary
-    api_response = response.json()
+    # Make the POST request for the token
+    token_response = requests.post(token_url, headers=token_headers, data=token_data)
+    token_response.raise_for_status()  # Raises an exception if the request failed
 
     # Get the access token
-    access_token = api_response['access_token']
+    access_token = token_response.json()['access_token']
 
-    # # Print the access token
-    # print(access_token)
+    # Define the URL and headers for the playlist request
+    playlist_url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
+    playlist_headers = {"Authorization": f"Bearer {access_token}"}
 
-    # Define the URL
-    url = "https://api.spotify.com/v1/playlists/" + playlist_id
+    # Make the GET request for the playlist
+    playlist_response = requests.get(playlist_url, headers=playlist_headers)
+    playlist_response.raise_for_status()  # Raises an exception if the request failed
 
-    # Define the headers
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
+    # Extract the tracks from the playlist response
+    tracks = playlist_response.json()['tracks']['items']
 
-    # Make the GET request
-    response = requests.get(url, headers=headers)
 
     # This section creates a simple LinkedList data structure to keep track of the albums and their counts.
     # It then loops through the tracks and increments the count of the album in the LinkedList.
@@ -112,8 +85,7 @@ def plot():
     # Initialize the LinkedList
     albums = LinkedList()
 
-    # Extract the tracks from the playlist response
-    tracks = response.json()['tracks']['items']
+    
 
     # For each track
     for track in tracks[:]:
