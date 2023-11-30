@@ -1,8 +1,43 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <style>
+        body {
+            background-color: #282828;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            margin: 0;
+        }
+
+        img, p {
+            width: 80%;
+            margin: auto;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #1DB954;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        /* Other CSS rules */
+    </style>
+    <!-- Other head content -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+
+</head>
 <body>
     <h1>Your Spotify Wrapped 2023 Top 100 Songs Analysis</h1>
     <img src="/static/plot.png" alt="Bar chart">
-    <p><a href="{{ url_for('form') }}">Analyze another playlist</a></p>
+    <p><a href="{{ url_for('form') }}" class="button">Analyze another playlist</a></p>
 </body>
 </html>
