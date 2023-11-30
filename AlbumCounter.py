@@ -137,14 +137,6 @@ def plot():
 def index():
     return render_template('index.html')
 
-
-@app.route('/plot.png')
-def plot_png():
-    try:
-        return send_from_directory(os.path.join('.', 'static'), 'plot.png')
-    except FileNotFoundError:
-        abort(404)  # Return a 404 Not Found error if the file does not exist
-
 def clear_static_folder():
     files = glob.glob('./static/*')
     for f in files:
