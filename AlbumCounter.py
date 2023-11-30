@@ -23,7 +23,6 @@ def form():
     if request.method == 'POST':
         # Get the URL from the form
         url = request.form.get('url')
-        print(f"URL in form(): {url}")  # Print the URL
         # Redirect to the /plot route with the URL as a parameter
         return redirect(url_for('plot', url=url))
     return render_template('form.html')
@@ -161,17 +160,8 @@ def clear_static_folder():
 
 atexit.register(clear_static_folder)
 
-
-def run_app():
+if __name__ == '__main__':
     try:
         app.run(debug=True)
     finally:
         clear_static_folder()
-
-if __name__ == '__main__':
-    try:
-        cProfile.run('run_app()', 'profile.txt')
-    except Exception as e:
-        print(f"Could not create profile.txt: {e}")
-
-    print(f"Current working directory: {os.getcwd()}")
