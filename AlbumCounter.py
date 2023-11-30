@@ -144,6 +144,8 @@ def clear_static_folder():
     for f in files:
         if 'favicon.png' in f:
             continue
+        elif 'github.png' in f:
+            continue
         os.remove(f)
 
 atexit.register(clear_static_folder)
