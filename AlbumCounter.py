@@ -112,6 +112,8 @@ def plot():
     # It converts the Dictionary to a DataFrame, sorts it, and plots it.
     # Feel free to alter the colors and the size of the plot to your liking!
 
+    plt.style.use('dark_background')
+
     #Convert the dictionary to a DataFrame
     df = pd.DataFrame(list(albums.items()), columns=['Album', 'Count'])
 
@@ -120,8 +122,8 @@ def plot():
     df = df.sort_values('Count', ascending=False)
 
     # Create a larger bar plot with seaborn
-    plt.figure(figsize=(12, 12))
-    plt.barh(df['Album'], df['Count'], color='blue')
+    plt.figure(figsize=(10, 10))
+    plt.barh(df['Album'], df['Count'], color='#1DB954')
     plt.gca().invert_yaxis()  # Invert y-axis to have the highest count at the top
     plt.xlabel('Count')
     plt.title('Occurence of Albums in Spotify Wrapped 2023 Top 100 Songs')
