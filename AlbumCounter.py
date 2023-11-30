@@ -1,20 +1,24 @@
 from flask import Flask, request, render_template, redirect, url_for
 import seaborn as sns
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import requests
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from io import BytesIO
 import base64
 
+
+
 app = Flask(__name__)
 
 @app.route('/', methods = ['GET', 'POST'])
 def form():
-
     if request.method == 'POST':
         # Get the URL from the form
         url = request.form.get('url')
+        print(f"URL in form(): {url}")  # Print the URL
         # Redirect to the /plot route with the URL as a parameter
         return redirect(url_for('plot', url=url))
     return render_template('form.html')
@@ -22,15 +26,14 @@ def form():
 @app.route('/plot', methods = ['GET', 'POST'])
 def plot():
     
-    playlist_id = request.args.get('url', default = "", type = str)
-    
-    # Split the URL by the '/' character and get the part after 'playlist/'
-    playlist_part = playlist_id.split('/')[-1]
+    url = request.args.get('url', default = "", type = str)
+    playlist_id = url.split('/')[-1]
+    if '?' in playlist_id:
+        playlist_id = playlist_id.split('?')[0]
 
-    # Split this part by the '?' character to get the playlist ID
-    playlist_id = playlist_part.split('?')[0]
+    if not playlist_id:
+        return "Error: No playlist ID provided"
 
-    print(playlist_id)
 
     # Define the URL, headers, and data for the token request
     token_url = "https://accounts.spotify.com/api/token"
@@ -43,21 +46,30 @@ def plot():
 
     # Make the POST request for the token
     token_response = requests.post(token_url, headers=token_headers, data=token_data)
-    token_response.raise_for_status()  # Raises an exception if the request failed
+    # token_response.raise_for_status()  # Raises an exception if the request failed
 
     # Get the access token
     access_token = token_response.json()['access_token']
 
     # Define the URL and headers for the playlist request
-    playlist_url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
+    playlist_url = "https://api.spotify.com/v1/playlists/" + playlist_id
     playlist_headers = {"Authorization": f"Bearer {access_token}"}
 
     # Make the GET request for the playlist
     playlist_response = requests.get(playlist_url, headers=playlist_headers)
-    playlist_response.raise_for_status()  # Raises an exception if the request failed
+    # playlist_response.raise_for_status()  # Raises an exception if the request failed
 
-    # Extract the tracks from the playlist response
-    tracks = playlist_response.json()['tracks']['items']
+    # Check the status of the response
+    if playlist_response.status_code != 200:
+        print(f"Error: Spotify API request returned status code {playlist_response.status_code}")
+        print(playlist_response.text)
+    else:
+        # Try to extract the tracks from the response
+        try:
+            tracks = playlist_response.json()['tracks']['items']
+        except KeyError:
+            print("Error: Response does not contain track items")
+            print(playlist_response.json())
 
 
     # This section creates a simple LinkedList data structure to keep track of the albums and their counts.
@@ -137,6 +149,7 @@ def plot():
         # Set the current node to the next node
         current = current.next
 
+
     # Convert the dictionary to a DataFrame
     df = pd.DataFrame(list(album_counts.items()), columns=['Album', 'Count'])
 
@@ -156,16 +169,10 @@ def plot():
 
     # Add tick marks by increments of one
     plt.xticks(range(0, df['Count'].max() + 1, 1))
-    fig = plt.gcf()
-    canvas = FigureCanvas(fig)
-    png_output = BytesIO()
-    canvas.print_png(png_output)
+    
+    plt.savefig('static/plot.png', bbox_inches='tight', transparent=True)
 
-    # Encode the BytesIO object as a base64 string
-    img_data = base64.b64encode(png_output.getvalue()).decode('utf8')
-
-    # Render the HTML template and pass the base64 string to it
-    return render_template('index.html', img_data=img_data)
+    return send_file('static/plot.png', mimetype='image/png')
 
 
 
