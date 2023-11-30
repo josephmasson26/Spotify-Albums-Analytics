@@ -9,6 +9,9 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from io import BytesIO
 import base64
 import os
+import atexit
+import glob
+
 
 
 
@@ -185,7 +188,15 @@ def plot_png():
     except FileNotFoundError:
         abort(404)  # Return a 404 Not Found error if the file does not exist
 
+def clear_static_folder():
+    files = glob.glob('./static/*')
+    for f in files:
+        os.remove(f)
 
+atexit.register(clear_static_folder)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        app.run(debug=True)
+    finally:
+        clear_static_folder()
