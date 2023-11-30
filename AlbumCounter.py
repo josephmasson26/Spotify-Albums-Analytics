@@ -8,9 +8,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from io import BytesIO
 import os
 import atexit
-
-
-
+import glob
 
 app = Flask(__name__)
 
@@ -25,7 +23,7 @@ def form():
 
 @app.route('/plot', methods = ['GET', 'POST'])
 def plot():
-    
+    #Split URL into the playlist ID
     url = request.args.get('url', default = "", type = str)
     playlist_id = url.split('/')[-1]
     if '?' in playlist_id:
@@ -109,7 +107,7 @@ def plot():
                     albums[album_title] = 1
     
     # Finally, this section handles the visualization of the data.
-    # It converts the LinkedList to a DataFrame, sorts it, and plots it.
+    # It converts the Dictionary to a DataFrame, sorts it, and plots it.
     # Feel free to alter the colors and the size of the plot to your liking!
 
     #Convert the dictionary to a DataFrame
@@ -118,12 +116,6 @@ def plot():
 
     # Sort the DataFrame by 'Count' in descending order
     df = df.sort_values('Count', ascending=False)
-
-    # Create a color palette with alternating colors
-    palette = sns.color_palette(["#1DB954", "#88D498"], len(df))
-
-    # Change the background color and the color of the text
-    sns.set_theme(style="darkgrid", rc={"axes.facecolor": "#191414", "axes.labelcolor": "black", "text.color": "black", "xtick.color": "black", "ytick.color": "black"})
 
     # Create a larger bar plot with seaborn
     plt.figure(figsize=(12, 12))
@@ -136,8 +128,6 @@ def plot():
     plt.xticks(range(0, df['Count'].max() + 1, 1))
     
     plt.savefig('static/plot.png')
-
-    
 
     return send_from_directory(os.path.join('.', 'static'), 'plot.png')
 
