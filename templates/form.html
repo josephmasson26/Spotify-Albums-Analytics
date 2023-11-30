@@ -15,6 +15,12 @@
         form {
             text-align: center;
         }
+        img {
+            width: 75px; /* Adjust as needed */
+            height: 75px; /* Adjust as needed */
+            display: block;
+            margin: 0 auto;
+        }
         input[type="text"], input[type="submit"] {
             background-color: #333;
             color: #fff;
@@ -27,10 +33,12 @@
             cursor: pointer;
         }
     </style>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
 </head>
 <body>
     <form method="POST">
+        <img src="{{ url_for('static', filename='favicon.png') }}" alt="Favicon">
         <label for="url">Enter a URL:</label><br>
         <input type="text" id="url" name="url"><br>
         <input type="submit" value="Submit">

@@ -142,6 +142,8 @@ def plot_png():
 def clear_static_folder():
     files = glob.glob('./static/*')
     for f in files:
+        if 'favicon.png' in f:
+            continue
         os.remove(f)
 
 atexit.register(clear_static_folder)
