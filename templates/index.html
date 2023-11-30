@@ -37,7 +37,7 @@
 </head>
 <body>
     <h1>Your Spotify Wrapped 2023 Top 100 Songs Analysis</h1>
-    <img src="/static/plot.png" alt="Bar chart">
+    <img src="{{ url_for('static', filename='plot.png') }}" alt="Plot">
     <p><a href="{{ url_for('form') }}" class="button">Analyze another playlist</a></p>
 </body>
 </html>

@@ -21,6 +21,8 @@ def form():
         return redirect(url_for('plot', url=url))
     return render_template('form.html')
 
+
+
 @app.route('/plot', methods = ['GET', 'POST'])
 def plot():
     #Split URL into the playlist ID
@@ -129,7 +131,11 @@ def plot():
     
     plt.savefig('static/plot.png')
 
-    return send_from_directory(os.path.join('.', 'static'), 'plot.png')
+    return redirect(url_for('index'))
+
+@app.route('/index')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/plot.png')
@@ -147,6 +153,8 @@ def clear_static_folder():
         elif 'github.png' in f:
             continue
         os.remove(f)
+    
+    return redirect(url_for('index'))
 
 atexit.register(clear_static_folder)
 
