@@ -1,10 +1,82 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <style>
+        body {
+            background-color: #282828;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 1.2em;
+        }
+        form {
+            text-align: center;
+        }
+        form, footer {
+            width: 80%;
+            margin: auto;
+        }
+        img {
+            width: 75px; /* Adjust as needed */
+            height: 75px; /* Adjust as needed */
+            display: block;
+            margin: 0 auto;
+        }
+        input[type="text"], input[type="submit"] {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 1.2em;
+        }
+        input[type="submit"] {
+            cursor: pointer;
+        }
+        footer{
+            clear: both;
+            text-align: center;
+            margin-top: 20px;
+        }
+        footer p, footer a {
+            font-size: 0.8em;
+            display: block;
+        }
+        footer img {
+            width: 25px; /* Adjust as needed */
+            height: 25px; /* Adjust as needed */
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+</head>
 <body>
     <form method="POST">
+        <img src="{{ url_for('static', filename='favicon.png') }}" alt="Favicon">
+        <h2>Spotify Wrapped Top Albums</h2>
         <label for="url">Enter a URL:</label><br>
         <input type="text" id="url" name="url"><br>
+        <h5>Playlist must be public to be analyzed</h5>
         <input type="submit" value="Submit">
     </form>
+    
+    
+
+    <footer>
+        <div>
+            <p>Developed by Joseph Masson</p>
+        </div>
+        <div>
+            <a href="https://github.com/josephmasson26/Spotify-Wrapped-Top-Albums">
+                <img src="{{ url_for('static', filename='github.png') }}" alt="GitHub">
+            </a>
+        </div>
+    </footer>
 </body>
 </html>
