@@ -75,42 +75,12 @@ def plot():
             print("Error: Response does not contain track items")
             print(playlist_response.json())
 
-
-    # This section creates a simple LinkedList data structure to keep track of the albums and their counts.
-    # It then loops through the tracks and increments the count of the album in the LinkedList.
-
     # Note that I discount albums if they have 2 or less songs in them, so that
     # singles don't show up in the collage.
 
-    class Node:
-        def __init__(self, album_title):
-            self.album_title = album_title
-            self.count = 1
-            self.next = None
-
-    class LinkedList:
-        def __init__(self):
-            self.head = None
-
-        def increment(self, album_title):
-            if not self.head:
-                self.head = Node(album_title)
-            else:
-                current = self.head
-                while current:
-                    if current.album_title == album_title:
-                        current.count += 1
-                        return
-                    if not current.next:
-                        current.next = Node(album_title)
-                        return
-                    current = current.next
-
-    # Initialize the LinkedList
-    albums = LinkedList()
-
+    # Initialize the dictionary
+    albums = {}
     
-
     # For each track
     for track in tracks[:]:
         # Extract the album ID
@@ -130,32 +100,17 @@ def plot():
             tracks.remove(track)
         else:
             # Increment the count of the album in the LinkedList
-            albums.increment(album_title)
-
+            if album_title in albums:
+                albums[album_title] += 1
+            else:
+                albums[album_title] = 1
     # Finally, this section handles the visualization of the data.
     # It converts the LinkedList to a DataFrame, sorts it, and plots it.
     # Feel free to alter the colors and the size of the plot to your liking!
 
+    #Convert the dictionary to a DataFrame
+    df = pd.DataFrame(list(albums.items()), columns=['Album', 'Count'])
 
-    
-
-    # Initialize an empty dictionary for album counts
-    album_counts = {}
-
-    # Set the current node to the head of the LinkedList
-    current = albums.head
-
-    # While the current node is not None
-    while current:
-        # Add the current node's album title and count to the dictionary
-        album_counts[current.album_title] = current.count
-
-        # Set the current node to the next node
-        current = current.next
-
-
-    # Convert the dictionary to a DataFrame
-    df = pd.DataFrame(list(album_counts.items()), columns=['Album', 'Count'])
 
     # Sort the DataFrame by 'Count' in descending order
     df = df.sort_values('Count', ascending=False)
@@ -200,3 +155,6 @@ if __name__ == '__main__':
         app.run(debug=True)
     finally:
         clear_static_folder()
+
+        
+#TODO show album covers like a topster?
