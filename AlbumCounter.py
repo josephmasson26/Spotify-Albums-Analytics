@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, send_from_directory
+from flask import Flask, request, abort, render_template, redirect, url_for, send_from_directory
 import seaborn as sns
 import pandas as pd
 import matplotlib
@@ -180,7 +180,10 @@ def plot():
 
 @app.route('/plot.png')
 def plot_png():
-    return send_from_directory(os.path.join('.', 'static'), 'plot.png')
+    try:
+        return send_from_directory(os.path.join('.', 'static'), 'plot.png')
+    except FileNotFoundError:
+        abort(404)  # Return a 404 Not Found error if the file does not exist
 
 
 
