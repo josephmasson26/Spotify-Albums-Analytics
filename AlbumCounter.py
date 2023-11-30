@@ -11,6 +11,7 @@ import base64
 import os
 import atexit
 import glob
+import cProfile
 
 
 
@@ -141,6 +142,8 @@ def plot():
     
     plt.savefig('static/plot.png')
 
+    
+
     return send_from_directory(os.path.join('.', 'static'), 'plot.png')
 
 
@@ -158,11 +161,17 @@ def clear_static_folder():
 
 atexit.register(clear_static_folder)
 
-if __name__ == '__main__':
+
+def run_app():
     try:
         app.run(debug=True)
     finally:
         clear_static_folder()
 
-        
-#TODO show album covers like a topster?
+if __name__ == '__main__':
+    try:
+        cProfile.run('run_app()', 'profile.txt')
+    except Exception as e:
+        print(f"Could not create profile.txt: {e}")
+
+    print(f"Current working directory: {os.getcwd()}")
