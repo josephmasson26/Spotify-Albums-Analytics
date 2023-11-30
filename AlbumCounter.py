@@ -21,6 +21,8 @@ def form():
         return redirect(url_for('plot', url=url))
     return render_template('form.html')
 
+
+
 @app.route('/plot', methods = ['GET', 'POST'])
 def plot():
     #Split URL into the playlist ID
@@ -110,6 +112,8 @@ def plot():
     # It converts the Dictionary to a DataFrame, sorts it, and plots it.
     # Feel free to alter the colors and the size of the plot to your liking!
 
+    plt.style.use('dark_background')
+
     #Convert the dictionary to a DataFrame
     df = pd.DataFrame(list(albums.items()), columns=['Album', 'Count'])
 
@@ -118,8 +122,8 @@ def plot():
     df = df.sort_values('Count', ascending=False)
 
     # Create a larger bar plot with seaborn
-    plt.figure(figsize=(12, 12))
-    plt.barh(df['Album'], df['Count'], color='blue')
+    plt.figure(figsize=(10, 10))
+    plt.barh(df['Album'], df['Count'], color='#1DB954')
     plt.gca().invert_yaxis()  # Invert y-axis to have the highest count at the top
     plt.xlabel('Count')
     plt.title('Occurence of Albums in Spotify Wrapped 2023 Top 100 Songs')
@@ -129,15 +133,11 @@ def plot():
     
     plt.savefig('static/plot.png')
 
-    return send_from_directory(os.path.join('.', 'static'), 'plot.png')
+    return redirect(url_for('index'))
 
-
-@app.route('/plot.png')
-def plot_png():
-    try:
-        return send_from_directory(os.path.join('.', 'static'), 'plot.png')
-    except FileNotFoundError:
-        abort(404)  # Return a 404 Not Found error if the file does not exist
+@app.route('/index')
+def index():
+    return render_template('index.html')
 
 def clear_static_folder():
     files = glob.glob('./static/*')
@@ -147,6 +147,8 @@ def clear_static_folder():
         elif 'github.png' in f:
             continue
         os.remove(f)
+    
+    return redirect(url_for('index'))
 
 atexit.register(clear_static_folder)
 
