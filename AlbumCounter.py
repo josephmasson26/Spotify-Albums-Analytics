@@ -152,8 +152,6 @@ def clear_static_folder():
         elif 'github.png' in f:
             continue
         os.remove(f)
-    
-    return redirect(url_for('index'))
 
 atexit.register(clear_static_folder)
 
