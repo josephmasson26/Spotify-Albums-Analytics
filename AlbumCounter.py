@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, send_from_directory
 import seaborn as sns
 import pandas as pd
 import matplotlib
@@ -8,6 +8,7 @@ import requests
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from io import BytesIO
 import base64
+import os
 
 
 
@@ -164,15 +165,20 @@ def plot():
 
     # Create a larger bar plot with seaborn
     plt.figure(figsize=(12, 12))
-    sns.barplot(x='Count', y='Album', data=df, orient='h', palette=palette)
+    plt.barh(df['Album'], df['Count'], color='blue')
+    plt.gca().invert_yaxis()  # Invert y-axis to have the highest count at the top
+    plt.xlabel('Count')
     plt.title('Occurence of Albums in Spotify Wrapped 2023 Top 100 Songs')
 
     # Add tick marks by increments of one
     plt.xticks(range(0, df['Count'].max() + 1, 1))
     
-    plt.savefig('static/plot.png', bbox_inches='tight', transparent=True)
+    plt.savefig('static/plot.png')
 
-    return send_file('static/plot.png', mimetype='image/png')
+
+@app.route('/plot.png')
+def plot_png():
+    return send_from_directory(os.path.join('.', 'static'), 'plot.png')
 
 
 
