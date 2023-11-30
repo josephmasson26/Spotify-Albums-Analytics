@@ -81,29 +81,37 @@ def plot():
     # Initialize the dictionary
     albums = {}
     
-    # For each track
-    for track in tracks[:]:
-        # Extract the album ID
-        album_id = track['track']['album']['id']
+    # Extract the album IDs
+    album_ids = [track['track']['album']['id'] for track in tracks]
+
+    # Split the album IDs into batches of 20 (the maximum allowed by the Spotify API)
+    album_id_batches = [album_ids[i:i + 20] for i in range(0, len(album_ids), 20)]
+
+    for album_id_batch in album_id_batches:
+        # Join the album IDs with commas
+        album_ids_str = ','.join(album_id_batch)
 
         # Make a GET request to the Spotify API to get the album details
-        album_response = requests.get(f"https://api.spotify.com/v1/albums/{album_id}", headers=playlist_headers)
+        album_response = requests.get(f"https://api.spotify.com/v1/albums?ids={album_ids_str}", headers=playlist_headers)
 
-        # Extract the album title
-        album_title = album_response.json()['name']
+        # The response will be a dictionary with an 'albums' key containing a list of album details
+        for album in album_response.json()['albums']:
+            # Extract the album title
+            album_title = album['name']
 
-        # Make a GET request to the Spotify API to get the album's tracks
-        album_tracks_response = requests.get(f"https://api.spotify.com/v1/albums/{album_id}/tracks", headers=playlist_headers)
+            # Make a GET request to the Spotify API to get the album's tracks
+            album_tracks_response = requests.get(f"https://api.spotify.com/v1/albums/{album['id']}/tracks", headers=playlist_headers)
 
-        # If the album does not have more than 2 songs, remove the track from tracks
-        if album_tracks_response.json()['total'] <= 2:
-            tracks.remove(track)
-        else:
-            # Increment the count of the album in the LinkedList
-            if album_title in albums:
-                albums[album_title] += 1
+            # If the album does not have more than 2 songs, remove the track from tracks
+            if album_tracks_response.json()['total'] <= 2:
+                tracks = [track for track in tracks if track['track']['album']['id'] != album['id']]
             else:
-                albums[album_title] = 1
+                # Increment the count of the album in the dictionary
+                if album_title in albums:
+                    albums[album_title] += 1
+                else:
+                    albums[album_title] = 1
+    
     # Finally, this section handles the visualization of the data.
     # It converts the LinkedList to a DataFrame, sorts it, and plots it.
     # Feel free to alter the colors and the size of the plot to your liking!
