@@ -90,23 +90,28 @@ def plot():
         # Make a GET request to the Spotify API to get the album details
         album_response = requests.get(f"https://api.spotify.com/v1/albums?ids={album_ids_str}", headers=playlist_headers)
 
-        # The response will be a dictionary with an 'albums' key containing a list of album details
-        for album in album_response.json()['albums']:
-            # Extract the album title
-            album_title = album['name']
+        if album_response.status_code == 200:
+            # The response will be a dictionary with an 'albums' key containing a list of album details
+            for album in album_response.json()['albums']:
+                # Extract the album title
+                album_title = album['name']
 
-            # Make a GET request to the Spotify API to get the album's tracks
-            album_tracks_response = requests.get(f"https://api.spotify.com/v1/albums/{album['id']}/tracks", headers=playlist_headers)
+                # Make a GET request to the Spotify API to get the album's tracks
+                album_tracks_response = requests.get(f"https://api.spotify.com/v1/albums/{album['id']}/tracks", headers=playlist_headers)
 
-            # If the album does not have more than 2 songs, remove the track from tracks
-            if album_tracks_response.json()['total'] <= 2:
-                tracks = [track for track in tracks if track['track']['album']['id'] != album['id']]
-            else:
-                # Increment the count of the album in the dictionary
-                if album_title in albums:
-                    albums[album_title] += 1
+                # If the album does not have more than 2 songs, remove the track from tracks
+                if album_tracks_response.json()['total'] <= 2:
+                    tracks = [track for track in tracks if track['track']['album']['id'] != album['id']]
                 else:
-                    albums[album_title] = 1
+                    # Increment the count of the album in the dictionary
+                    if album_title in albums:
+                        albums[album_title] += 1
+                    else:
+                        albums[album_title] = 1
+        else:
+            print(f"Error: Spotify API request returned status code: {album_response.status_code}")
+            # Exit the program
+            exit()
     
     # Finally, this section handles the visualization of the data.
     # It converts the Dictionary to a DataFrame, sorts it, and plots it.
