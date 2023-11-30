@@ -175,6 +175,8 @@ def plot():
     
     plt.savefig('static/plot.png')
 
+    return send_from_directory(os.path.join('.', 'static'), 'plot.png')
+
 
 @app.route('/plot.png')
 def plot_png():
