@@ -1,5 +1,4 @@
 from flask import Flask, request, abort, render_template, redirect, url_for, send_from_directory
-import seaborn as sns
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
@@ -7,11 +6,8 @@ import matplotlib.pyplot as plt
 import requests
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from io import BytesIO
-import base64
 import os
 import atexit
-import glob
-import cProfile
 
 
 
