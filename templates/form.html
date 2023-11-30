@@ -39,8 +39,10 @@
 <body>
     <form method="POST">
         <img src="{{ url_for('static', filename='favicon.png') }}" alt="Favicon">
+        <h2>Spotify Wrapped Top Albums</h2>
         <label for="url">Enter a URL:</label><br>
         <input type="text" id="url" name="url"><br>
+        <h5>Playlist must be public to be analyzed</h5>
         <input type="submit" value="Submit">
     </form>
 </body>
