@@ -9,6 +9,7 @@ from io import BytesIO
 import os
 import atexit
 import glob
+import time
 
 app = Flask(__name__)
 
@@ -58,6 +59,11 @@ def plot():
     # Make the GET request for the playlist
     playlist_response = requests.get(playlist_url, headers=playlist_headers)
     # playlist_response.raise_for_status()  # Raises an exception if the request failed
+    
+    if playlist_response.status_code == 429:
+        retry_after = playlist_response.headers['Retry-After']
+        time.sleep(int(retry_after))
+        playlist_response = requests.get(playlist_url, headers=playlist_headers)
 
     # Check the status of the response
     if playlist_response.status_code != 200:
@@ -89,7 +95,11 @@ def plot():
 
         # Make a GET request to the Spotify API to get the album details
         album_response = requests.get(f"https://api.spotify.com/v1/albums?ids={album_ids_str}", headers=playlist_headers)
-
+        if album_response.status_code == 429:
+            retry_after = album_response.headers['Retry-After']
+            time.sleep(int(retry_after))
+            album_response = requests.get(f"https://api.spotify.com/v1/albums?ids={album_ids_str}", headers=playlist_headers)
+    
         if album_response.status_code == 200:
             # The response will be a dictionary with an 'albums' key containing a list of album details
             for album in album_response.json()['albums']:
