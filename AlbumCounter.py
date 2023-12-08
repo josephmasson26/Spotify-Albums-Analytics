@@ -63,6 +63,7 @@ def plot():
     if playlist_response.status_code == 429:
         retry_after = playlist_response.headers['Retry-After']
         time.sleep(int(retry_after))
+        print(int(retry_after))
         playlist_response = requests.get(playlist_url, headers=playlist_headers)
 
     # Check the status of the response
