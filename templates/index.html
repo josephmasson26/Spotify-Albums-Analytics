@@ -9,13 +9,12 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            height: 100vh;
             text-align: center;
             margin: 0;
             padding-top: 50px;
         }
         header {
-            margin-top: 20px;
+            margin-top: 0px;
             padding-bottom: 50px;
         }
 
@@ -35,12 +34,21 @@
             border: none;
             border-radius: 5px;
             text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
         }
 
         .plot {
             margin-top: 0px;
             width: auto;
             height: auto;
+        }
+        .collage {
+            margin-top: 0px;
+            width: auto;
+            height: auto;
+            max-width: 300px;
+            max-height: 300px;
         }
 
         /* Other CSS rules */
@@ -53,7 +61,15 @@
     <h1 class="header">Your Spotify Wrapped 2023 Top 100 Songs Analysis</h1>
     
     <img src="{{ url_for('static', filename='plot.png') }}" alt="Plot" class="plot">
+
+    <a href="{{ url_for('static', filename='plot.png') }}" download="MyPlot.png">
+        <button class="button">Download Plot</button>
+    </a>
+
     <p><a href="{{ url_for('form') }}" class="button">Analyze another playlist</a></p>
+
+    <h2>Album Collage</h2>
+    <img src="{{ url_for('static', filename='collage.png') }}" alt="Album Collage" class = "collage">
 
     <footer>
         <div>
