@@ -1,11 +1,9 @@
-from flask import Flask, request, abort, render_template, redirect, url_for, send_from_directory
+from flask import Flask, request, render_template, redirect, url_for
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import requests
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from io import BytesIO
 import os
 import atexit
 import glob
