@@ -152,7 +152,7 @@ def plot():
                     else:
                         albums[album_title] = 1
                     # If we haven't fetched 9 album covers yet or if the album id is not in fetched_album_ids, fetch this album's cover
-                    if album_covers_fetched < 9 or album['id'] not in fetched_album_ids:
+                    if album_covers_fetched < 9 and album['id'] not in fetched_album_ids:
                         
 
                         # The album cover URL will be in the 'images' key of the album details
