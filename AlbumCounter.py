@@ -1,17 +1,16 @@
-from flask import Flask, request, abort, render_template, redirect, url_for, send_from_directory
+from flask import Flask, request, render_template, redirect, url_for
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import requests
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from io import BytesIO
 import os
 import atexit
 import glob
 import time
 from PIL import Image
 
+# Global function to create the collage of album covers saved in the static server folder
 def create_collage(image_files, collage_path='static/collage.png'):
     # Assume all images are the same size
     img_sample = Image.open(image_files[0])
@@ -42,6 +41,7 @@ def create_collage(image_files, collage_path='static/collage.png'):
 
 app = Flask(__name__)
 
+# Define the home page route
 @app.route('/', methods = ['GET', 'POST'])
 def form():
     if request.method == 'POST':
@@ -52,9 +52,10 @@ def form():
     return render_template('form.html')
 
 
-
+# Define the /plot route
 @app.route('/plot', methods = ['GET', 'POST'])
 def plot():
+
     #Split URL into the playlist ID
     url = request.args.get('url', default = "", type = str)
     playlist_id = url.split('/')[-1]
@@ -89,13 +90,15 @@ def plot():
     playlist_response = requests.get(playlist_url, headers=playlist_headers)
     # playlist_response.raise_for_status()  # Raises an exception if the request failed
     
+    # If the request failed, print the error and exit the program
+    # 429 is the status code for "Too Many Requests" and provides a Retry-After for you to wait
     if playlist_response.status_code == 429:
         retry_after = playlist_response.headers['Retry-After']
         time.sleep(int(retry_after))
         print(int(retry_after))
         playlist_response = requests.get(playlist_url, headers=playlist_headers)
 
-    # Check the status of the response
+    # Check the status of the response, if it's not 200, print the error and exit the program
     if playlist_response.status_code != 200:
         print(f"Error: Spotify API request returned status code {playlist_response.status_code}")
         print(playlist_response.text)
@@ -119,20 +122,24 @@ def plot():
     # Split the album IDs into batches of 20 (the maximum allowed by the Spotify API)
     album_id_batches = [album_ids[i:i + 20] for i in range(0, len(album_ids), 20)]
     
+    # Initialize the counter for the number of album covers fetched and the list of fetched album IDs for the collage
     album_covers_fetched = 0
     fetched_album_ids = []
 
+    # Iterate over the batches of album IDs
     for album_id_batch in album_id_batches:
         # Join the album IDs with commas
         album_ids_str = ','.join(album_id_batch)
 
         # Make a GET request to the Spotify API to get the album details
         album_response = requests.get(f"https://api.spotify.com/v1/albums?ids={album_ids_str}", headers=playlist_headers)
+        # Another instance of the 429 code for too many requests
         if album_response.status_code == 429:
             retry_after = album_response.headers['Retry-After']
             time.sleep(int(retry_after))
             album_response = requests.get(f"https://api.spotify.com/v1/albums?ids={album_ids_str}", headers=playlist_headers)
     
+        # If the request was successful, extract the album details
         if album_response.status_code == 200:
             # The response will be a dictionary with an 'albums' key containing a list of album details
             for album in album_response.json()['albums']:
@@ -151,10 +158,9 @@ def plot():
                         albums[album_title] += 1
                     else:
                         albums[album_title] = 1
+
                     # If we haven't fetched 9 album covers yet or if the album id is not in fetched_album_ids, fetch this album's cover
                     if album_covers_fetched < 9 and album['id'] not in fetched_album_ids:
-                        
-
                         # The album cover URL will be in the 'images' key of the album details
                         album_cover_url = album['images'][0]['url']
 
@@ -170,12 +176,12 @@ def plot():
 
                         # Increment the counter
                         album_covers_fetched += 1
+        # Print the unsuccessful status code
         else:
             print(f"Error: Spotify API request returned status code: {album_response.status_code}")
             # Exit the program
             exit()
 
-    # Create a collage of the album covers
     # Get a list of the album cover image files
     image_files = [f'static/{album_id}.png' for album_id in fetched_album_ids]
 
@@ -185,7 +191,6 @@ def plot():
     # Finally, this section handles the visualization of the data.
     # It converts the Dictionary to a DataFrame, sorts it, and plots it.
     # Feel free to alter the colors and the size of the plot to your liking!
-
     plt.style.use('dark_background')
 
     #Convert the dictionary to a DataFrame
@@ -207,12 +212,15 @@ def plot():
     plt.tight_layout()
     plt.savefig('static/plot.png')
 
+    # Return the plot and collage
     return redirect(url_for('index'))
 
+# Define the /index route
 @app.route('/index')
 def index():
     return render_template('index.html')
 
+# Function to clear the static folder after the program is exited
 def clear_static_folder():
     files = glob.glob('./static/*')
     for f in files:
@@ -222,8 +230,10 @@ def clear_static_folder():
             continue
         os.remove(f)
 
+# Register the clear_static_folder function to run when the program is exited
 atexit.register(clear_static_folder)
 
+# Run the app
 if __name__ == '__main__':
     try:
         app.run(debug=True)
