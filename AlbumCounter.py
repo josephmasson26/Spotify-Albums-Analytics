@@ -138,7 +138,7 @@ def plot():
     df = df.sort_values('Count', ascending=False)
 
     # Create a larger bar plot with seaborn
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(15, 5))
     plt.barh(df['Album'], df['Count'], color='#1DB954')
     plt.gca().invert_yaxis()  # Invert y-axis to have the highest count at the top
     plt.xlabel('Count')
@@ -146,7 +146,7 @@ def plot():
 
     # Add tick marks by increments of one
     plt.xticks(range(0, df['Count'].max() + 1, 1))
-    
+    plt.tight_layout()
     plt.savefig('static/plot.png')
 
     return redirect(url_for('index'))
