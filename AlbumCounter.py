@@ -10,6 +10,35 @@ import os
 import atexit
 import glob
 import time
+from PIL import Image
+
+def create_collage(image_files, collage_path='static/collage.png'):
+    # Assume all images are the same size
+    img_sample = Image.open(image_files[0])
+    img_width, img_height = img_sample.size
+
+    # Define collage width and height
+    collage_width = 3 * img_width
+    collage_height = 3 * img_height
+
+    # Create a blank canvas for the collage
+    collage = Image.new('RGB', (collage_width, collage_height))
+
+    # Iterate over the images and add them to the collage
+    x = 0
+    y = 0
+    for image_file in image_files:
+        img = Image.open(image_file)
+        collage.paste(img, (x, y))
+        x += img_width
+        if x >= collage_width:
+            x = 0
+            y += img_height
+
+    # Save the collage
+    collage.save(collage_path)
+
+
 
 app = Flask(__name__)
 
@@ -90,7 +119,8 @@ def plot():
     # Split the album IDs into batches of 20 (the maximum allowed by the Spotify API)
     album_id_batches = [album_ids[i:i + 20] for i in range(0, len(album_ids), 20)]
     
-    album_covers_fetched = 0;
+    album_covers_fetched = 0
+    fetched_album_ids = []
 
     for album_id_batch in album_id_batches:
         # Join the album IDs with commas
@@ -121,8 +151,10 @@ def plot():
                         albums[album_title] += 1
                     else:
                         albums[album_title] = 1
-                    # If we haven't fetched 9 album covers yet, fetch this album's cover
-                    if album_covers_fetched < 9:
+                    # If we haven't fetched 9 album covers yet or if the album id is not in fetched_album_ids, fetch this album's cover
+                    if album_covers_fetched < 9 or album['id'] not in fetched_album_ids:
+                        
+
                         # The album cover URL will be in the 'images' key of the album details
                         album_cover_url = album['images'][0]['url']
 
@@ -133,12 +165,22 @@ def plot():
                         with open(f'static/{album["id"]}.png', 'wb') as f:
                             f.write(album_cover_response.content)
 
+                        # Add the album ID to the list of fetched album IDs
+                        fetched_album_ids.append(album['id'])
+
                         # Increment the counter
                         album_covers_fetched += 1
         else:
             print(f"Error: Spotify API request returned status code: {album_response.status_code}")
             # Exit the program
             exit()
+
+    # Create a collage of the album covers
+    # Get a list of the album cover image files
+    image_files = [f'static/{album_id}.png' for album_id in fetched_album_ids]
+
+    # Create a collage of the album covers
+    create_collage(image_files)
     
     # Finally, this section handles the visualization of the data.
     # It converts the Dictionary to a DataFrame, sorts it, and plots it.
