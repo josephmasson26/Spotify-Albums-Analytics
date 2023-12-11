@@ -12,14 +12,19 @@
             height: 100vh;
             text-align: center;
             margin: 0;
+            padding-top: 50px;
+        }
+        header {
+            margin-top: 20px;
+            padding-bottom: 50px;
         }
 
         
         img {
-            width: 75px; /* Adjust as needed */
-            height: 75px; /* Adjust as needed */
+            width: 25px; /* Adjust as needed */
+            height: 25px; /* Adjust as needed */
             display: block;
-            margin: 0 auto;
+            margin: auto;
         }
 
         .button {
@@ -33,7 +38,7 @@
         }
 
         .plot {
-            margin-top: 50px;
+            margin-top: 0px;
             width: auto;
             height: auto;
         }
@@ -45,10 +50,8 @@
 
 </head>
 <body>
-    <h1>Your Spotify Wrapped 2023 Top 100 Songs Analysis</h1>
-
-    <br>
-
+    <h1 class="header">Your Spotify Wrapped 2023 Top 100 Songs Analysis</h1>
+    
     <img src="{{ url_for('static', filename='plot.png') }}" alt="Plot" class="plot">
     <p><a href="{{ url_for('form') }}" class="button">Analyze another playlist</a></p>
 
