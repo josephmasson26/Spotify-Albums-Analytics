@@ -89,6 +89,8 @@ def plot():
 
     # Split the album IDs into batches of 20 (the maximum allowed by the Spotify API)
     album_id_batches = [album_ids[i:i + 20] for i in range(0, len(album_ids), 20)]
+    
+    album_covers_fetched = 0;
 
     for album_id_batch in album_id_batches:
         # Join the album IDs with commas
@@ -119,6 +121,20 @@ def plot():
                         albums[album_title] += 1
                     else:
                         albums[album_title] = 1
+                    # If we haven't fetched 9 album covers yet, fetch this album's cover
+                    if album_covers_fetched < 9:
+                        # The album cover URL will be in the 'images' key of the album details
+                        album_cover_url = album['images'][0]['url']
+
+                        # Make a GET request to the album cover URL to fetch the image
+                        album_cover_response = requests.get(album_cover_url)
+
+                        # Save the album cover image to a file
+                        with open(f'static/{album["id"]}.png', 'wb') as f:
+                            f.write(album_cover_response.content)
+
+                        # Increment the counter
+                        album_covers_fetched += 1
         else:
             print(f"Error: Spotify API request returned status code: {album_response.status_code}")
             # Exit the program
