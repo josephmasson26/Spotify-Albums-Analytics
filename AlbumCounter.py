@@ -132,7 +132,7 @@ def plot():
 
     #Convert the dictionary to a DataFrame
     df = pd.DataFrame(list(albums.items()), columns=['Album', 'Count'])
-
+    df['Album'] = df['Album'].str.slice(0, 20)  # Slice the album titles to 20 characters
 
     # Sort the DataFrame by 'Count' in descending order
     df = df.sort_values('Count', ascending=False)
