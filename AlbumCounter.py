@@ -9,6 +9,7 @@ from io import BytesIO
 import os
 import atexit
 import glob
+import time
 
 app = Flask(__name__)
 
@@ -58,6 +59,12 @@ def plot():
     # Make the GET request for the playlist
     playlist_response = requests.get(playlist_url, headers=playlist_headers)
     # playlist_response.raise_for_status()  # Raises an exception if the request failed
+    
+    if playlist_response.status_code == 429:
+        retry_after = playlist_response.headers['Retry-After']
+        time.sleep(int(retry_after))
+        print(int(retry_after))
+        playlist_response = requests.get(playlist_url, headers=playlist_headers)
 
     # Check the status of the response
     if playlist_response.status_code != 200:
@@ -89,7 +96,11 @@ def plot():
 
         # Make a GET request to the Spotify API to get the album details
         album_response = requests.get(f"https://api.spotify.com/v1/albums?ids={album_ids_str}", headers=playlist_headers)
-
+        if album_response.status_code == 429:
+            retry_after = album_response.headers['Retry-After']
+            time.sleep(int(retry_after))
+            album_response = requests.get(f"https://api.spotify.com/v1/albums?ids={album_ids_str}", headers=playlist_headers)
+    
         if album_response.status_code == 200:
             # The response will be a dictionary with an 'albums' key containing a list of album details
             for album in album_response.json()['albums']:
@@ -121,13 +132,13 @@ def plot():
 
     #Convert the dictionary to a DataFrame
     df = pd.DataFrame(list(albums.items()), columns=['Album', 'Count'])
-
+    df['Album'] = df['Album'].str.slice(0, 20)  # Slice the album titles to 20 characters
 
     # Sort the DataFrame by 'Count' in descending order
     df = df.sort_values('Count', ascending=False)
 
     # Create a larger bar plot with seaborn
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(10, 6))
     plt.barh(df['Album'], df['Count'], color='#1DB954')
     plt.gca().invert_yaxis()  # Invert y-axis to have the highest count at the top
     plt.xlabel('Count')
@@ -135,7 +146,7 @@ def plot():
 
     # Add tick marks by increments of one
     plt.xticks(range(0, df['Count'].max() + 1, 1))
-    
+    plt.tight_layout()
     plt.savefig('static/plot.png')
 
     return redirect(url_for('index'))
